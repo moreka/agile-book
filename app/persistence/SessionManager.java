@@ -1,10 +1,10 @@
-package persistance;
+package persistence;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 import java.util.Map;
 
@@ -16,8 +16,8 @@ public final class SessionManager {
         if (sessionFactory == null) {
             Configuration cfg = getConfiguration(null);
 
-            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
-                    cfg.getProperties()).build();
+            ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
+                    cfg.getProperties()).buildServiceRegistry();
             sessionFactory = cfg.buildSessionFactory(serviceRegistry);
         }
 
@@ -27,8 +27,8 @@ public final class SessionManager {
     static public Session getSession(Map<String, String> map) {
         Configuration cfg = getConfiguration(map);
 
-        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
-                cfg.getProperties()).build();
+        ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
+                cfg.getProperties()).buildServiceRegistry();
         SessionFactory sessionFactory = cfg.buildSessionFactory(serviceRegistry);
 
         return sessionFactory.getCurrentSession();

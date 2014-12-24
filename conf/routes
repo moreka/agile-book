@@ -3,7 +3,13 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
+GET         /                    controllers.AgileBook.index()
+
+#Authorication
+GET         /login               controllers.Authentication.login()
+POST        /submitLogin        controllers.Authentication.submitLogin(email:String, password:String)
+GET         /registeration        controllers.Authentication.registration(email:String, password:String)
+GET         /submitRegistration        controllers.Authentication.submitRegistration(email:String, password:String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file        controllers.Assets.at(path="/public", file)
