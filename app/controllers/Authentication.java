@@ -2,55 +2,82 @@ package controllers;
 
 import persistence.entity.User;
 import persistence.helper.UserHelper;
+import play.data.Form;
 import play.db.jpa.Transactional;
+import play.data.validation.Constraints;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.login;
-import views.html.registration;
+import views.html.register;
 
-/**
- * Created by root on 12/23/14.
- */
+
 public class Authentication extends Controller {
+
+    public static class LoginForm {
+        @Constraints.Required
+        @Constraints.Email(message = "error.email")
+        public String email;
+
+        @Constraints.Required
+        @Constraints.MinLength(value = 8, message = "error.password")
+        public String password;
+
+        public String validate() {
+            if (!UserHelper.authenticate(email, password))
+                return Messages.get("error.login");
+            return null;
+        }
+    }
 
     public static final String SESSION_EMAIL = "email";
 
     public static Result login(){
-        return ok(login.render(false));
+        return ok(login.render(Form.form(LoginForm.class)));
     }
 
     @Transactional
-    public static Result submitLogin(String email, String password){
-        try{
-            if(UserHelper.authenticate(email, password)){
-                setSessionData(email);
-                return redirect(routes.AgileBook.index());
-            }else
-                return error();
-        }catch (Exception e){
-            return error();
+    public static Result submitLogin() {
+        Form<LoginForm> loginForm = Form.form(LoginForm.class).bindFromRequest();
+
+        if (loginForm.hasErrors()) {
+            return badRequest(login.render(loginForm));
+        }
+        else {
+            setSessionData(loginForm.get().email);
+            return redirect(routes.AgileBook.index());
+        }
+    }
+
+    public static class RegisterForm {
+        @Constraints.Required
+        @Constraints.Email(message = "error.email")
+        public String email;
+
+        @Constraints.Required
+        @Constraints.MinLength(value = 8, message = "error.password")
+        public String password;
+
+        public String validate() {
+            if (UserHelper.userExists(email))
+                return Messages.get("error.register.exists");
+            return null;
+        }
+    }
+
+    public static Result registration() {
+        return ok(register.render(Form.form(RegisterForm.class)));
+    }
+
+    @Transactional
+    public static Result submitRegistration(){
+        Form<RegisterForm> registerForm = Form.form(RegisterForm.class).bindFromRequest();
+
+        if (registerForm.hasErrors()) {
+            return badRequest(register.render(registerForm));
         }
 
-        return null;
-    }
-
-    public static Result registration(String email, String password){
-        if (email == null)
-            email = "";
-
-        if (password == null)
-            password = "";
-
-        boolean userExists = UserHelper.userExists(email);
-
-        return ok(registration.render(userExists, email, password));
-    }
-
-    public static Result submitRegistration(String email, String password){
-        if (email == null || email.equals("") || password == null || password.equals("") || UserHelper.userExists(email))
-            return ok(registration.render(false, email, password));
-
-        User user = UserHelper.createNewUser(email, password);
+        User user = UserHelper.createNewUser(registerForm.get().email, registerForm.get().password);
         setSessionData(user.getEmail());
         return redirect(routes.AgileBook.index());
     }
@@ -60,7 +87,8 @@ public class Authentication extends Controller {
         session(SESSION_EMAIL, email);
     }
 
-    private static Status error() {
-        return ok(login.render(true));
+    public static Result logout() {
+        session().clear();
+        return redirect(routes.AgileBook.index());
     }
 }

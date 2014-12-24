@@ -4,11 +4,14 @@ import persistence.entity.User;
 import play.db.jpa.JPA;
 import play.db.jpa.Transactional;
 
+import javax.persistence.Query;
+
 /**
  * Created by root on 12/23/14.
  */
 public class UserHelper {
     public static final String DATABASE_NAME = "users";
+    public static final String ENTITY_NAME = "User";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
 
@@ -17,9 +20,11 @@ public class UserHelper {
         if (email == null || email.equals("") || password == null || email.equals(""))
             return false;
 
-        Integer count = (Integer) JPA.em().createQuery("SELECT COUNT(*) FROM " + DATABASE_NAME + " " +
+        Query query = JPA.em().createQuery("SELECT COUNT(*) FROM " + ENTITY_NAME + " " +
                 "WHERE " + EMAIL + " = :" + EMAIL + " AND " + PASSWORD + " = :" + PASSWORD)
-                .setParameter(EMAIL, email).setParameter(PASSWORD, password).getSingleResult();
+                .setParameter(EMAIL, email).setParameter(PASSWORD, password);
+        System.out.println(query);
+        Long count = (Long) query.getSingleResult();
 
         return count != null && count > 0;
     }
@@ -28,7 +33,7 @@ public class UserHelper {
         if (email == null || email.equals(""))
             return false;
 
-        Integer count = (Integer) JPA.em().createQuery("SELECT COUNT(*) FROM " + DATABASE_NAME + " " +
+        Long count = (Long) JPA.em().createQuery("SELECT COUNT(*) FROM " + ENTITY_NAME + " " +
                 "WHERE " + EMAIL + " = :" + EMAIL).setParameter(EMAIL, email).getSingleResult();
 
         return count != null && count > 0;

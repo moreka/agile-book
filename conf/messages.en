@@ -1,0 +1,4 @@
+error.email=Email format must be correct.
+error.login=Email or password may be incorrect. Login failed!
+error.password=Password must be at least 8 characters long.
+error.register.exists=User already exists.
